@@ -23,15 +23,11 @@
     state: present    
   notify: restart postgresql
 
+
 - name: Remove Pipelinedb Resource File
   file:
     path: "{{postgresql_aptfile_tmppath}}/apt.sh"
     state: absent
-
-- name: Add Pipelinedb Extension 
-  become: yes
-  become_user: "{{postgresql_admin_user}}"
-  shell: psql -d {{ postgresql_databases }} -c "CREATE EXTENSION pipelinedb"
 
 - name: Replace Config File
   template:
@@ -40,7 +36,19 @@
     owner: "{{ postgresql_service_user }}"
     group: "{{ postgresql_service_group }}"
     mode: '0640'
-  notify: restart postgresql
+
+- name: Restart Postgres Service
+  service:
+   name: "{{ postgresql_service_name }}"
+   state: restarted 
+
+
+- name: Add Pipelinedb Extension 
+  become: yes
+  become_user: "{{postgresql_admin_user}}"
+  shell: psql -d {{ postgresql_databases }} -c "CREATE EXTENSION pipelinedb"
+
+
 
 
 
