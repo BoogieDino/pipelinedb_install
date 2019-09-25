@@ -1,0 +1,9 @@
+all:
+  hosts:
+  children:
+    postgres_clusters:
+      hosts:
+        pgtest:
+      vars: 
+        ansible_port: 22
+        ansible_user: "root"

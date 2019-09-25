@@ -1,0 +1,48 @@
+---
+
+- name: Install Pipelinedb 
+  hosts: "{{defaultshost}}"
+  tasks:
+    - name: Stop Postgres Service
+      service:
+       name: postgresql
+       state: stopped
+
+    - name: Download Pipelinedb Resource File
+      get_url: 
+        force: yes
+        url: http://download.pipelinedb.com/apt.sh
+        dest: "{{postgresql_aptfile_tmppath}}/apt.sh"
+        mode: '0755'
+
+    - name: Run Pipelinedb Resource File
+      command: "bash {{postgresql_aptfile_tmppath}}/apt.sh"
+
+
+    - name: Install the package "pipelinedb-postgresql-{{ postgresql_version }}"
+      apt:
+        name: "pipelinedb-postgresql-{{ postgresql_version }}"
+        state: present    
+      notify: restart postgresql
+
+    - name: Remove Pipelinedb Resource File
+      file:
+        path: "{{postgresql_aptfile_tmppath}}/apt.sh"
+        state: absent
+
+    - name: Add Pipelinedb Extension 
+      become: yes
+      become_user: "{{postgresql_admin_user}}"
+      shell: psql -d {{ postgresql_databases }} -c "CREATE EXTENSION pipelinedb"
+
+    - name: Replace Config File
+      template:
+        src: "postgresql.conf-{{ postgresql_version }}.j2"
+        dest: "{{postgresql_conf_directory}}/postgresql.conf"
+        owner: "{{ postgresql_service_user }}"
+        group: "{{ postgresql_service_group }}"
+        mode: '0640'
+      notify: restart postgresql
+
+
+

@@ -1,0 +1,7 @@
+---
+- hosts: pgtest
+  become: yes
+  vars_files:
+    -  ./custom.yaml
+  roles:
+    - role: anxs.postgresql

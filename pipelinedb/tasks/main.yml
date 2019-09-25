@@ -1,0 +1,11 @@
+---
+
+- include_vars: "{{ item }}"
+  with_first_found:
+    - "xenial.yml"
+  tags: [always]
+
+- name: Install Pipelinedb Extension
+  import_tasks: extensions.yml
+  tags: [pipelinedb, pipelinedb-install]
+  
